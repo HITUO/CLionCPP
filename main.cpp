@@ -6,7 +6,7 @@ constexpr int kMaxN = 3e6 + 7;
 
 int T, n, q;
 
-int tran(char c) {
+int trans(char c) {
     if ('a' <= c && c <= 'z') return c - 'a';
     if ('A' <= c && c <= 'Z') return c - 'A' + 26;
     if ('0' <= c && c <= '9') return c - '0' + 52;
@@ -19,7 +19,7 @@ struct Trie {
     void insert(string &word) {
         int u = 1;
         for (auto c : word) {
-            int v = tran(c);
+            int v = trans(c);
             if (son[u][v] == 0) {
                 son[u][v] = ++idx;
                 memset(son[idx], 0, sizeof(son[idx]));
@@ -33,7 +33,7 @@ struct Trie {
     int query(string &word) {
         int u = 1;
         for (auto c : word) {
-            int v = tran(c);
+            int v = trans(c);
             if (son[u][v] == 0) return 0;
             u = son[u][v];
         }
