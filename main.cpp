@@ -4,69 +4,66 @@ using namespace std;
 
 constexpr int kMaxN = 3e6 + 7;
 
-struct Trie {
-    int idx, son[kMaxN][3], cnt[kMaxN], is_end[kMaxN];
+int trie[kMaxN][27], fail[kMaxN], cnt[kMaxN], ed[kMaxN], q[kMaxN], total;
 
-    void insert(vector<int>& word) {
-        int u = 1;
-        for (int i : word) {
-            cnt[u]++;
-            if (son[u][i] == 0) {
-                son[u][i] = ++idx;
-            }
-            u = son[u][i];
-        }
-        is_end[u]++;
+void insert(string &s, int idx) {
+    int u = 0;
+    for (auto c : s) {
+        int k = c - 'a';
+        if (trie[u][k] == 0) trie[u][k] = ++total;
+        u = trie[u][k];
     }
+    ed[idx] = u;
+}
 
-    int query(vector<int>& word) {
-        int u = 1, ret = 0;
-        for (int i : word) {
-            if (son[u][i]) {
-                u = son[u][i];
-                if (is_end[u]) {
-                    ret += is_end[u];
-                }
-            } else return ret;
-        }
-        // if (is_end[u]) {
-        //     ret += is_end[u];
-        // }
-        ret += cnt[u];
-        return ret;
+void build() {
+    int head = 0, tail = 0;
+    for (int i = 0; i < 26; i++) {
+        if (trie[0][i]) {
+            int v = trie[0][i];
+            q[tail++] = v;
+            fail[v] = 0;
+        } else trie[0][i] = 0;
     }
-} root;
+    while (head < tail) {
+        int u = q[head++];
+        for (int i = 0; i < 26; i++) {
+            int v = trie[u][i];
+            if (v) {
+                fail[v] = trie[fail[u]][i];
+                q[tail++] = v;
+            } else trie[u][i] = trie[fail[u]][i];
+        }
+    }
+}
 
-int m, n;
+void query(string &s) {
+    int u = 0;
+    for (auto c : s) {
+        u = trie[u][c - 'a'];
+        cnt[u]++;
+    }
+}
+
+int n;
+string ss;
 
 signed main() {
     ios::sync_with_stdio(false), cin.tie(nullptr);
-    cin >> m >> n;
-    root.idx = 1;
-    memset(root.son, 0, sizeof(root.son));
-    memset(root.is_end, 0, sizeof(root.is_end));
-    memset(root.cnt, 0, sizeof(root.cnt));
-    for (int i = 1; i <= m; i++) {
-        int x;
-        cin >> x;
-        vector<int> word;
-        for (int j = 1; j <= x; j++) {
-            int xx;
-            cin >> xx;
-            word.push_back(xx);
-        }
-        root.insert(word);
+    cin >> n;
+    for (int i = 0; i < n; i++) {
+        string s; cin >> s;
+        insert(s, i + 1);
+    }
+    build();
+    cin >> ss;
+    query(ss);
+    for (int i = total; i >= 1; i--) {
+        int v = q[i - 1];
+        cnt[fail[v]] += cnt[v];
     }
     for (int i = 1; i <= n; i++) {
-        int x;
-        cin >> x;
-        vector<int> word;
-        for (int j = 1; j <= x; j++) {
-            int xx;
-            cin >> xx;
-            word.push_back(xx);
-        }
-        cout << root.query(word) << endl;
+        cout << cnt[ed[i]] << "\n";
     }
     return 0;
 }
