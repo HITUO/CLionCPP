@@ -2,49 +2,37 @@
 
 using namespace std;
 
+#define int long long
+
 constexpr int kMaxN = 3e6 + 7, kMaxW = 30;
 
-struct Tire {
-    int idx;
-    vector<array<int, 2>> son;
-    vector<int> val;
+int c, T, a, b;
 
-    Tire(int _n) : idx(1), son(_n * 32 + 7), val(_n * 32 + 7) {}
-
-    void insert(int x) {
-        int u = 0;
-        for (int i = kMaxW; i >= 0; i--) {
-            int b = (x >> i) & 1, &v = son[u][b];
-            if (!v) v = idx++;
-            u = v;
-        }
-        val[u] = x;
-    }
-
-    int query(int x) {
-        int u = 0;
-        for (int i = kMaxW; i >= 0; i--) {
-            int b = (x >> i) & 1;
-            u = son[u][b ^ 1] ? son[u][b ^ 1] : son[u][b];
-        }
-        return val[u];
-    }
-};
-
-int n;
+int calculate(int x) {
+    return (a + x) / __gcd(b + x, a - b) * (b + x);
+}
 
 signed main() {
     ios::sync_with_stdio(false), cin.tie(nullptr);
-    cin >> n;
-    Tire tree(n + 1);
-    tree.insert(0);
-    int ans = -1, sx = 0, x;
-    for (int i = 1; i <= n; i++) {
-        cin >> x;
-        sx ^= x;
-        ans = max(ans, sx ^ tree.query(sx));
-        tree.insert(sx);
+    cin >> c >> T;
+    while (T--) {
+        cin >> a >> b;
+        if (a == b) {
+            cout << a << endl;
+            continue;
+        }
+        int ans = LLONG_MAX;
+        if (a < b) {
+            swap(a, b);
+        }
+        int t = a - b;
+        for (int i = 1; i * i <= t; i++) {
+            int left = t / i;
+            int n1 = (i - a % i) % i, n2 = (left - a % left) % left;
+            ans = min(ans, calculate(n1));
+            ans = min(ans, calculate(n2));
+        }
+        cout << ans << endl;
     }
-    cout << ans << '\n';
     return 0;
-}
+}// CopyCodeForces abbr.CCF
